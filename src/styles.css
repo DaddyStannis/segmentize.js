@@ -1,0 +1,141 @@
+.seg-root {
+  position: relative;
+}
+
+/* Visual text layer */
+.seg-visual-layer {
+  display: flex;
+  gap: var(--seg-gap);
+
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Real text layer */
+.seg-text-layer {
+  position: absolute;
+  z-index: 10;
+  color: transparent;
+  white-space: nowrap;
+}
+
+.seg-text-layer span {
+  display: inline-block;
+  vertical-align: top;
+
+  width: var(--seg-char-w);
+  height: var(--seg-char-h);
+  line-height: var(--seg-char-h);
+  text-align: center;
+
+  margin-right: var(--seg-gap);
+
+  transform: skewX(var(--seg-skew));
+
+  font-size: calc(var(--seg-char-h) * 0.8);
+  font-family: monospace;
+  user-select: text;
+}
+
+.seg-text-layer span:last-child {
+  margin-right: 0;
+}
+
+.seg-text-layer span::selection {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.seg-char {
+  position: relative;
+
+  width: var(--seg-char-w, 2em);
+  height: var(--seg-char-h, 3.5em);
+
+  transform: skewX(var(--seg-skew, 0deg));
+}
+
+/* Basic segments style */
+.seg-segment {
+  position: absolute;
+  background-color: var(--seg-off, #333);
+  transition:
+    background-color 0.1s ease,
+    box-shadow 0.1s ease;
+  opacity: 0.3;
+}
+
+.seg-segment.seg-on {
+  background-color: var(--seg-on, #00ff00);
+  box-shadow: var(--seg-glow, none);
+  opacity: 1;
+}
+
+/* Gorizontal segments (A, D, G) */
+.seg-a,
+.seg-d,
+.seg-g {
+  height: var(--seg-char-t);
+
+  /* WIDTH: 100% minus 1 thickness minus 1 gap */
+  width: calc(100% - var(--seg-char-t) - var(--seg-char-gap));
+
+  /* PADDING LEFT: A half of width + a half of gap */
+  left: calc((var(--seg-char-t) + var(--seg-char-gap)) / 2);
+
+  clip-path: polygon(
+    0 50%,
+    calc(var(--seg-char-t) / 2) 0,
+    calc(100% - var(--seg-char-t) / 2) 0,
+    100% 50%,
+    calc(100% - var(--seg-char-t) / 2) 100%,
+    calc(var(--seg-char-t) / 2) 100%
+  );
+}
+
+.seg-a {
+  top: 0;
+}
+.seg-d {
+  bottom: 0;
+}
+.seg-g {
+  top: calc(50% - (var(--seg-char-t) / 2));
+}
+
+/* Vertical segments (B, C, E, F) */
+.seg-b,
+.seg-c,
+.seg-e,
+.seg-f {
+  width: var(--seg-char-t);
+
+  /* HEIGHT: 50% minus a half of thickness minus 1 gap */
+  height: calc(50% - (var(--seg-char-t) / 2) - var(--seg-char-gap));
+
+  clip-path: polygon(
+    50% 0,
+    100% calc(var(--seg-char-t) / 2),
+    100% calc(100% - var(--seg-char-t) / 2),
+    50% 100%,
+    0 calc(100% - var(--seg-char-t) / 2),
+    0 calc(var(--seg-char-t) / 2)
+  );
+}
+
+/* Vertical gaps (top/bottom on a half of thickness + a half of gap) */
+.seg-b {
+  top: calc((var(--seg-char-t) + var(--seg-char-gap)) / 2);
+  right: 0;
+}
+.seg-c {
+  bottom: calc((var(--seg-char-t) + var(--seg-char-gap)) / 2);
+  right: 0;
+}
+.seg-f {
+  top: calc((var(--seg-char-t) + var(--seg-char-gap)) / 2);
+  left: 0;
+}
+.seg-e {
+  bottom: calc((var(--seg-char-t) + var(--seg-char-gap)) / 2);
+  left: 0;
+}

@@ -3,6 +3,7 @@ import { SegmentBoard } from "../src";
 const board = new SegmentBoard("#board-container", {
   text: "808.",
   skew: "-10deg",
+  glow: true,
   colorOn: "#ff2a00",
   colorOff: "#632217",
   gap: "8px",

@@ -106,10 +106,10 @@ export class SegmentBoard {
     );
 
     // Setup glow
-    const glowShadow = this._options.glow
-      ? `0 0 10px ${this._options.colorOn}`
+    const glowFilter = this._options.glow
+      ? `drop-shadow(0 0 5px ${this._options.colorOn})`
       : "none";
-    this._root.style.setProperty("--seg-glow", glowShadow);
+    this._root.style.setProperty("--seg-glow", glowFilter);
 
     // Basic styles
     this._root.classList.add("seg-root");
@@ -149,14 +149,20 @@ export class SegmentBoard {
         const segmentNames = ["a", "b", "c", "d", "e", "f", "g"];
 
         for (let i = 0; i < 7; ++i) {
+          const wrapper = document.createElement("div");
+          wrapper.className = "seg-segment-wrapper";
+
           const segment = document.createElement("div");
           segment.className = `seg-segment seg-${segmentNames[i]}`;
 
+          wrapper.appendChild(segment);
+
           if (pattern[i] === 1) {
             segment.classList.add("seg-on");
+            wrapper.classList.add("seg-glow");
           }
 
-          box.appendChild(segment);
+          box.appendChild(wrapper);
         }
       }
 

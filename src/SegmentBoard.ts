@@ -28,15 +28,15 @@ export interface IBoardOptions {
   gap?: Dimension;
 }
 
-export const defaultDimension = "em";
-export const defaultAngle = "deg";
+const DEFAULT_DIMENSION = "em";
+const DEFAULT_ANGLE = "deg";
 
 function dim2str(dim: Dimension): string {
-  return typeof dim === "string" ? dim : `${dim}${defaultDimension}`;
+  return typeof dim === "string" ? dim : `${dim}${DEFAULT_DIMENSION}`;
 }
 
 function ang2str(ang: Angle): string {
-  return typeof ang === "string" ? ang : `${ang}${defaultAngle}`;
+  return typeof ang === "string" ? ang : `${ang}${DEFAULT_ANGLE}`;
 }
 
 export class SegmentBoard {
@@ -53,10 +53,10 @@ export class SegmentBoard {
     }
 
     if (!el) {
-      const identifier =
+      const id =
         typeof selector === "string" ? selector : "provided by HTMLElement";
       throw new Error(
-        `[segmentize.js] Container "${identifier}" not found or incorrect type provided.`,
+        `[segmentize.js] Container "${id}" not found or incorrect type provided.`,
       );
     }
 
@@ -69,7 +69,7 @@ export class SegmentBoard {
       colorOff: options.colorOff || "#1a1a1a",
       glow: options.glow ?? true,
       skew: options.skew || 0,
-      gap: options.gap || 2,
+      gap: options.gap || 1,
       char: {
         width: options.char?.width || 2,
         height: options.char?.height || 4,
@@ -124,7 +124,7 @@ export class SegmentBoard {
   private render() {
     this._root.innerHTML = "";
 
-    const chars = this._options.text.split("");
+    const chars = this.splitText();
 
     // Hidden text
     const textLayer = document.createElement("div");
@@ -145,15 +145,14 @@ export class SegmentBoard {
     const visualLayer = document.createElement("div");
     visualLayer.className = "seg-visual-layer";
 
-    chars.forEach((char) => {
+    chars.forEach((char, i, arr) => {
       const box = document.createElement("div");
       box.className = "seg-char";
 
       if (this._options.type === "7-segment") {
         const baseChar = char[0];
         const hasDot = char.includes(".");
-
-        const pattern = SEGMENT_MAP_7[char] || SEGMENT_MAP_7[" "];
+        const pattern = SEGMENT_MAP_7[baseChar] || SEGMENT_MAP_7[" "];
         const segmentNames = ["a", "b", "c", "d", "e", "f", "g"];
 
         for (let i = 0; i < 7; ++i) {
@@ -172,11 +171,42 @@ export class SegmentBoard {
 
           box.appendChild(wrapper);
         }
+
+        const dpWrapper = document.createElement("div");
+        dpWrapper.className = "seg-glow";
+
+        const dpSegment = document.createElement("div");
+        dpSegment.className = "seg-segment seg-dp";
+
+        if (hasDot || baseChar === ".") {
+          dpSegment.classList.add("seg-on");
+          dpWrapper.style.filter = "var(--seg-glow, none)";
+        }
+
+        dpWrapper.appendChild(dpSegment);
+        box.appendChild(dpWrapper);
       }
 
       visualLayer.appendChild(box);
     });
 
     this._root.appendChild(visualLayer);
+  }
+
+  private splitText(): string[] {
+    const rawChars = this._options.text.split("");
+
+    const chars: string[] = [];
+    for (let i = 0; i < rawChars.length; ++i) {
+      const char = rawChars[i];
+
+      if (char === "." && i > 0 && !chars[chars.length - 1].includes(".")) {
+        chars[chars.length - 1] += ".";
+      } else {
+        chars.push(char);
+      }
+    }
+
+    return chars;
   }
 }

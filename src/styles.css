@@ -147,3 +147,12 @@
   bottom: calc((var(--seg-char-t) + var(--seg-char-gap)) / 2);
   left: 0;
 }
+
+/* Decimal point */
+.seg-dp {
+  width: var(--seg-char-t);
+  height: var(--seg-char-t);
+  bottom: 0;
+  right: calc(var(--seg-char-t) * -1.5);
+  border-radius: 50%;
+}

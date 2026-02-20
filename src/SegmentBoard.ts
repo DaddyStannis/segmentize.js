@@ -24,8 +24,8 @@ export interface IBoardOptions {
   colorOff?: string;
   glow?: boolean;
   skew?: Angle;
-  char?: ICharOptions;
   gap?: Dimension;
+  char?: ICharOptions;
 }
 
 const DEFAULT_DIMENSION = "em";
@@ -133,6 +133,11 @@ export class SegmentBoard {
     chars.forEach((char) => {
       const wrapper = document.createElement("div");
       wrapper.className = "seg-text-wrapper";
+
+      if (char[0] === ":") {
+        wrapper.classList.add("seg-text-wrapper-colon");
+      }
+
       const span = document.createElement("span");
       wrapper.appendChild(span);
       span.textContent = char;
@@ -145,13 +150,30 @@ export class SegmentBoard {
     const visualLayer = document.createElement("div");
     visualLayer.className = "seg-visual-layer";
 
-    chars.forEach((char, i, arr) => {
+    chars.forEach((char) => {
       const box = document.createElement("div");
       box.className = "seg-char";
+      const baseChar = char[0];
+      const hasDot = char.includes(".");
 
-      if (this._options.type === "7-segment") {
-        const baseChar = char[0];
-        const hasDot = char.includes(".");
+      if (baseChar === ":") {
+        box.className = "seg-char seg-colon-box";
+
+        for (let i = 0; i < 2; i++) {
+          const dotWrapper = document.createElement("div");
+          dotWrapper.className = "seg-glow";
+
+          const dot = document.createElement("div");
+          dot.className = "seg-segment seg-colon-dot seg-on";
+
+          if (this._options.glow) {
+            dotWrapper.style.filter = "var(--seg-glow, none)";
+          }
+
+          dotWrapper.appendChild(dot);
+          box.appendChild(dotWrapper);
+        }
+      } else if (this._options.type === "7-segment") {
         const pattern = SEGMENT_MAP_7[baseChar] || SEGMENT_MAP_7[" "];
         const segmentNames = ["a", "b", "c", "d", "e", "f", "g"];
 

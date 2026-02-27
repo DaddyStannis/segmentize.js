@@ -9,12 +9,25 @@ const __dirname = dirname(__filename);
 export default defineConfig({
   build: {
     lib: {
-      entry: resolve(__dirname, "src/index.ts"),
+      entry: {
+        index: resolve(__dirname, "src/index.ts"),
+        react: resolve(__dirname, "src/react.tsx"),
+      },
+      formats: ["es", "cjs"],
       name: "Segmentize",
       fileName: "segmentize",
+    },
+    rollupOptions: {
+      external: ["react", "react-dom", "react/jsx-runtime"],
+      output: {
+        globals: {
+          react: "React",
+          "react-dom": "ReactDOM",
+        },
+      },
     },
     outDir: "dist",
     emptyOutDir: true,
   },
-  plugins: [dts({ rollupTypes: true })],
+  plugins: [dts({ rollupTypes: true, insertTypesEntry: true })],
 });

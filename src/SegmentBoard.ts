@@ -4,7 +4,6 @@ import {
   Matrix5x7Strategy,
   SevenSegmentStrategy,
 } from "./strategies";
-import "./styles.css";
 import { ang2str, dim2str, getPerfectChar } from "./utils";
 
 export class SegmentBoard {

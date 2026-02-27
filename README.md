@@ -47,7 +47,7 @@ import { SegmentDisplay } from 'segment-board/react';
 **TypeScript:**
 
 ```TypeScript
-import { SegmentBoard } from './segment-board';
+import { SegmentBoard } from 'segment-board';
 
 // 1. Initialize the board
 const board = new SegmentBoard('#neon-board', {

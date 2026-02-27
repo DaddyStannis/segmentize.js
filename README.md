@@ -27,13 +27,19 @@ import { SegmentBoard } from './segmentize';
 
 // 1. Initialize the board
 const board = new SegmentBoard('#neon-board', {
-  text: "20.26",          // Initial text (supports decimal points)
-  type: "7-segment",      // Display type
+  text: "20.26",          // Initial text (supports decimal points and colons)
+  type: "7-segment",      // Display type ("7-segment" or "matrix")
+
+  // --- Basic Configuration ---
+  size: 1,                // Global scale multiplier (e.g., 2 makes the board twice as big)
   colorOn: "#00ff00",     // Color of active segments (neon)
   colorOff: "#1a1a1a",    // Color of inactive segments
-  glow: 1.5,              // Glow intensity multiplier
+  glow: 1.5,              // Glow intensity multiplier (or boolean)
   skew: -10,              // Italic effect in degrees
-  gap: 0.5,               // Gap between characters (in em)
+  gap: 0.5,               // Gap between characters (in em, scales with size)
+
+  // --- Advanced Configuration (Optional) ---
+  // Overrides perfect default proportions. Usually, you only need 'size' above.
   char: {
     width: 2.5,           // Width of a single character (in em)
     height: 4.5,          // Height of a single character (in em)

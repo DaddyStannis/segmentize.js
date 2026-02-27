@@ -1,20 +1,11 @@
-import { SEGMENT_MAP_7 } from "./segment-maps";
-import type { Angle, Dimension } from "./types";
 import type { IBoardOptions, ICharOptions, Strategy } from "./IBoardOptions";
+import {
+  type IDisplayStrategy,
+  MatrixStrategy,
+  SevenSegmentStrategy,
+} from "./strategies";
 import "./styles.css";
-import { MatrixStrategy, SevenSegmentStrategy } from "./strategies";
-import { IDisplayStrategy } from "./strategies/IDisplayStrategy";
-
-const DEFAULT_DIMENSION = "em";
-const DEFAULT_ANGLE = "deg";
-
-function dim2str(dim: Dimension): string {
-  return typeof dim === "string" ? dim : `${dim}${DEFAULT_DIMENSION}`;
-}
-
-function ang2str(ang: Angle): string {
-  return typeof ang === "string" ? ang : `${ang}${DEFAULT_ANGLE}`;
-}
+import { ang2str, dim2str, getPerfectChar } from "./utils";
 
 export class SegmentBoard {
   private _root: HTMLElement;
@@ -40,19 +31,25 @@ export class SegmentBoard {
 
     this._root = el;
 
+    const perfectChar = getPerfectChar(
+      options.type || "7-segment",
+      options.size,
+    );
+
     this._options = {
       text: options.text || "",
       type: options.type || "7-segment",
-      colorOn: options.colorOn || "#00ff00",
-      colorOff: options.colorOff || "#1a1a1a",
+      colorOn: options.colorOn || "#ff2a00",
+      colorOff: options.colorOff || "#632217",
       glow: options.glow ?? true,
       skew: options.skew || 0,
       gap: options.gap || 1,
+      size: options.size || 1,
       char: {
-        width: options.char?.width || 2,
-        height: options.char?.height || 4,
-        thickness: options.char?.thickness || 0.3,
-        gap: options.char?.gap || 0.15,
+        width: options.char?.width || perfectChar.width,
+        height: options.char?.height || perfectChar.height,
+        thickness: options.char?.thickness || perfectChar.thickness,
+        gap: options.char?.gap || perfectChar.gap,
       },
     };
 
@@ -60,7 +57,7 @@ export class SegmentBoard {
 
     this._strategies = {
       "7-segment": new SevenSegmentStrategy(this._options),
-      matrix: new MatrixStrategy(),
+      matrix: new MatrixStrategy(this._options),
     };
 
     this.render();
@@ -76,6 +73,7 @@ export class SegmentBoard {
       "--seg-char-gap",
       dim2str(this._options.char.gap),
     );
+
     this._root.style.setProperty(
       "--seg-char-w",
       dim2str(this._options.char.width),
@@ -97,6 +95,7 @@ export class SegmentBoard {
 
     // Basic styles
     this._root.classList.add("seg-root");
+    this._root.classList.add(`seg-${this._options.type}`);
   }
 
   public setText(text: string) {
@@ -122,7 +121,7 @@ export class SegmentBoard {
       const wrapper = document.createElement("div");
       wrapper.className = "seg-text-wrapper";
 
-      if (char[0] === ":") {
+      if (char[0] === ":" && this._options.type !== "matrix") {
         wrapper.classList.add("seg-text-wrapper-colon");
       }
 

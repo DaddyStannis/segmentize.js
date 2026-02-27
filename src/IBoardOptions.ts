@@ -16,6 +16,7 @@ export interface IBoardOptions {
   colorOff?: string;
   glow?: boolean;
   skew?: Angle;
+  size?: number;
   gap?: Dimension;
   char?: ICharOptions;
 }

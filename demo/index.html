@@ -15,7 +15,12 @@
         height: 100vh;
         margin: 0;
       }
-      #board-container {
+      .wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
+      .container {
         padding: 2rem;
         border: 2px dashed #444;
         border-radius: 8px;
@@ -23,7 +28,17 @@
     </style>
   </head>
   <body>
-    <div id="board-container"></div>
+    <div class="wrapper">
+      <fieldset class="container">
+        <legend>5x7 Matrix Display</legend>
+        <div id="board-container1"></div>
+      </fieldset>
+
+      <fieldset class="container">
+        <legend>7-Segment Display</legend>
+        <div id="board-container2"></div>
+      </fieldset>
+    </div>
 
     <script type="module" src="./main.ts"></script>
   </body>

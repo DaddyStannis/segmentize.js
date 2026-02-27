@@ -46,6 +46,8 @@
 
   transform: skewX(var(--seg-skew));
   user-select: text;
+
+  width: 100%;
 }
 
 .seg-text-wrapper span::selection {
@@ -81,6 +83,8 @@
   background-color: var(--seg-on, #00ff00);
   opacity: 1;
 }
+
+/* === SEVEN SEGMENTS === */
 
 /* Gorizontal segments (A, D, G) */
 .seg-a,
@@ -182,4 +186,48 @@
 .seg-colon-box .seg-glow {
   position: relative;
   inset: auto;
+}
+
+/* === MATRIX === */
+
+.seg-matrix-box {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: repeat(7, minmax(0, 1fr));
+  gap: var(--seg-char-gap);
+
+  width: var(--seg-char-w);
+  height: var(--seg-char-h);
+
+  aspect-ratio: 5 / 7;
+
+  position: relative;
+  transform: skewX(var(--seg-skew, 0deg));
+}
+
+.seg-matrix-dot-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  container-type: size;
+}
+
+.seg-matrix-dot {
+  width: 100cqmin;
+  height: 100cqmin;
+
+  border-radius: 50%;
+
+  background-color: var(--seg-off, #333);
+  transition: background-color 0.1s ease;
+  opacity: 0.3;
+}
+
+.seg-matrix-dot.seg-on {
+  background-color: var(--seg-on, #00ff00);
+  opacity: 1;
 }

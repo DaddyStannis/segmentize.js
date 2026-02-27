@@ -1,21 +1,19 @@
 import { SegmentBoard } from "../src";
 
-const board = new SegmentBoard("#board-container", {
-  text: "127.0.0.1",
-  skew: "-10deg",
-  glow: true,
+const board = new SegmentBoard("#board-container1", {
+  type: "matrix",
+  text: "127.0.0.1:3000",
+  skew: -10,
   colorOn: "#ff2a00",
   colorOff: "#632217",
-  gap: 1,
-  char: {
-    width: 2,
-    height: 4,
-    thickness: 0.3,
-    gap: 0.15,
-  },
+  size: 1,
 });
 
-// Check dynamic update after 2 seconds
-setTimeout(() => {
-  board.setText("404");
-}, 2000);
+const board2 = new SegmentBoard("#board-container2", {
+  type: "7-segment",
+  text: "127.0.0.1:3000",
+  skew: -10,
+  colorOn: "#ff2a00",
+  colorOff: "#632217",
+  size: 1,
+});

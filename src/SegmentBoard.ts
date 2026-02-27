@@ -1,47 +1,16 @@
-import { SEGMENT_MAP_7 } from "./segment-maps";
+import type { IBoardOptions, ICharOptions, Strategy } from "./IBoardOptions";
+import {
+  type IDisplayStrategy,
+  MatrixStrategy,
+  SevenSegmentStrategy,
+} from "./strategies";
 import "./styles.css";
-
-export type Dimension =
-  | number
-  | `${number}em`
-  | `${number}rem`
-  | `${number}px`
-  | `${number}%`;
-
-export type Angle = number | `${number}deg`;
-
-export interface ICharOptions {
-  width?: Dimension;
-  height?: Dimension;
-  thickness?: Dimension;
-  gap?: Dimension;
-}
-
-export interface IBoardOptions {
-  text: string;
-  type?: "7-segment" | "14-segment" | "matrix";
-  colorOn?: string;
-  colorOff?: string;
-  glow?: boolean;
-  skew?: Angle;
-  gap?: Dimension;
-  char?: ICharOptions;
-}
-
-const DEFAULT_DIMENSION = "em";
-const DEFAULT_ANGLE = "deg";
-
-function dim2str(dim: Dimension): string {
-  return typeof dim === "string" ? dim : `${dim}${DEFAULT_DIMENSION}`;
-}
-
-function ang2str(ang: Angle): string {
-  return typeof ang === "string" ? ang : `${ang}${DEFAULT_ANGLE}`;
-}
+import { ang2str, dim2str, getPerfectChar } from "./utils";
 
 export class SegmentBoard {
   private _root: HTMLElement;
   private _options: Required<IBoardOptions> & { char: Required<ICharOptions> };
+  private _strategies: Record<Strategy, IDisplayStrategy>;
 
   constructor(selector: string | HTMLElement, options: IBoardOptions) {
     let el: HTMLElement | null = null;
@@ -62,23 +31,34 @@ export class SegmentBoard {
 
     this._root = el;
 
+    const perfectChar = getPerfectChar(
+      options.type || "7-segment",
+      options.size,
+    );
+
     this._options = {
       text: options.text || "",
       type: options.type || "7-segment",
-      colorOn: options.colorOn || "#00ff00",
-      colorOff: options.colorOff || "#1a1a1a",
+      colorOn: options.colorOn || "#ff2a00",
+      colorOff: options.colorOff || "#632217",
       glow: options.glow ?? true,
       skew: options.skew || 0,
       gap: options.gap || 1,
+      size: options.size || 1,
       char: {
-        width: options.char?.width || 2,
-        height: options.char?.height || 4,
-        thickness: options.char?.thickness || 0.3,
-        gap: options.char?.gap || 0.15,
+        width: options.char?.width || perfectChar.width,
+        height: options.char?.height || perfectChar.height,
+        thickness: options.char?.thickness || perfectChar.thickness,
+        gap: options.char?.gap || perfectChar.gap,
       },
     };
 
     this.setupStyles();
+
+    this._strategies = {
+      "7-segment": new SevenSegmentStrategy(this._options),
+      matrix: new MatrixStrategy(this._options),
+    };
 
     this.render();
   }
@@ -93,6 +73,7 @@ export class SegmentBoard {
       "--seg-char-gap",
       dim2str(this._options.char.gap),
     );
+
     this._root.style.setProperty(
       "--seg-char-w",
       dim2str(this._options.char.width),
@@ -114,6 +95,7 @@ export class SegmentBoard {
 
     // Basic styles
     this._root.classList.add("seg-root");
+    this._root.classList.add(`seg-${this._options.type}`);
   }
 
   public setText(text: string) {
@@ -123,6 +105,11 @@ export class SegmentBoard {
 
   private render() {
     this._root.innerHTML = "";
+    const strategy = this._strategies[this._options.type];
+
+    if (!strategy) {
+      throw new Error("[segmentize.js] Invalid display type specified.");
+    }
 
     const chars = this.splitText();
 
@@ -134,7 +121,7 @@ export class SegmentBoard {
       const wrapper = document.createElement("div");
       wrapper.className = "seg-text-wrapper";
 
-      if (char[0] === ":") {
+      if (char[0] === ":" && this._options.type !== "matrix") {
         wrapper.classList.add("seg-text-wrapper-colon");
       }
 
@@ -151,63 +138,10 @@ export class SegmentBoard {
     visualLayer.className = "seg-visual-layer";
 
     chars.forEach((char) => {
-      const box = document.createElement("div");
-      box.className = "seg-char";
       const baseChar = char[0];
       const hasDot = char.includes(".");
 
-      if (baseChar === ":") {
-        box.className = "seg-char seg-colon-box";
-
-        for (let i = 0; i < 2; i++) {
-          const dotWrapper = document.createElement("div");
-          dotWrapper.className = "seg-glow";
-
-          const dot = document.createElement("div");
-          dot.className = "seg-segment seg-colon-dot seg-on";
-
-          if (this._options.glow) {
-            dotWrapper.style.filter = "var(--seg-glow, none)";
-          }
-
-          dotWrapper.appendChild(dot);
-          box.appendChild(dotWrapper);
-        }
-      } else if (this._options.type === "7-segment") {
-        const pattern = SEGMENT_MAP_7[baseChar] || SEGMENT_MAP_7[" "];
-        const segmentNames = ["a", "b", "c", "d", "e", "f", "g"];
-
-        for (let i = 0; i < 7; ++i) {
-          const wrapper = document.createElement("div");
-          wrapper.className = "seg-segment-wrapper";
-
-          const segment = document.createElement("div");
-          segment.className = `seg-segment seg-${segmentNames[i]}`;
-
-          wrapper.appendChild(segment);
-
-          if (pattern[i] === 1) {
-            segment.classList.add("seg-on");
-            wrapper.classList.add("seg-glow");
-          }
-
-          box.appendChild(wrapper);
-        }
-
-        const dpWrapper = document.createElement("div");
-        dpWrapper.className = "seg-glow";
-
-        const dpSegment = document.createElement("div");
-        dpSegment.className = "seg-segment seg-dp";
-
-        if (hasDot || baseChar === ".") {
-          dpSegment.classList.add("seg-on");
-          dpWrapper.style.filter = "var(--seg-glow, none)";
-        }
-
-        dpWrapper.appendChild(dpSegment);
-        box.appendChild(dpWrapper);
-      }
+      const box = strategy.renderChar(baseChar, hasDot);
 
       visualLayer.appendChild(box);
     });
